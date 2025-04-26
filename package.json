@@ -9,7 +9,7 @@
     "build": "tsc"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sok Rithean",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
