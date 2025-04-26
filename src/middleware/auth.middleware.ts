@@ -10,7 +10,6 @@ declare global {
   }
 }
 
-// Authentication Middleware
 export const authenticate = (
   req: Request,
   res: Response,
@@ -19,26 +18,25 @@ export const authenticate = (
   const authHeader = req.headers["authorization"];
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return errorResponse(res, 401, "Unauthorized");
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = verifyAccessToken(token);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return errorResponse(res, 401, "Unauthorized");
+    errorResponse(res, 401, "Unauthorized");
+  } else {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = verifyAccessToken(token);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      errorResponse(res, 401, "Unauthorized");
+    }
   }
 };
 
-// Authorization Middleware
 export const authorize = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return errorResponse(res, 403, "Forbidden");
+      errorResponse(res, 403, "Forbidden");
+    } else {
+      next();
     }
-    next();
   };
 };

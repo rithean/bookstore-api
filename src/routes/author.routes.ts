@@ -6,13 +6,29 @@ import {
   getAuthorByIdController,
   updateAuthorController,
 } from "../controllers/author.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
-router.post("/create", createAuthorController);
-router.get("/", getAllAuthorsController);
-router.get("/:id", getAuthorByIdController);
-router.put("/update/:id", updateAuthorController);
-router.delete("/delete/:id", deleteAuthorController);
+router.post(
+  "/create",
+  authenticate,
+  authorize(["admin"]),
+  createAuthorController
+);
+router.get("/", authenticate, getAllAuthorsController);
+router.get("/:id", authenticate, getAuthorByIdController);
+router.put(
+  "/update/:id",
+  authenticate,
+  authorize(["admin"]),
+  updateAuthorController
+);
+router.delete(
+  "/delete/:id",
+  authenticate,
+  authorize(["admin"]),
+  deleteAuthorController
+);
 
 export default router;

@@ -5,17 +5,23 @@ import {
   refreshAccessToken,
 } from "../services/auth.service";
 import { errorResponse, successResponse } from "../utils/response";
+import {
+  loginSchema,
+  refreshTokenSchema,
+  registerSchema,
+} from "../validations/auth.validation";
 
 export const registerController = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { error } = registerSchema.validate(req.body);
 
-    if (!name || !email || !password) {
-      errorResponse(res, 400, "All fields are required.");
+    if (error) {
+      errorResponse(res, 400, error.details.map((e) => e.message).join(","));
     }
 
-    await registerUser({ name, email, password });
+    const { name, email, password } = req.body;
 
+    await registerUser({ name, email, password });
     successResponse(res, 201, "User registered successfully");
   } catch (error: any) {
     console.error("Error registering user:", error);
@@ -29,11 +35,13 @@ export const registerController = async (req: Request, res: Response) => {
 
 export const loginController = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { error } = loginSchema.validate(req.body);
 
-    if (!email || !password) {
-      errorResponse(res, 400, "All fields are required.");
+    if (error) {
+      errorResponse(res, 400, error.details.map((e) => e.message).join(","));
     }
+
+    const { email, password } = req.body;
 
     const { accessToken, refreshToken, user } = await loginUser(
       email,
@@ -58,12 +66,12 @@ export const loginController = async (req: Request, res: Response) => {
 
 export const refreshController = async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = req.body;
+    const { error } = refreshTokenSchema.validate(req.body);
 
-    if (!refreshToken) {
-      errorResponse(res, 400, "Refresh token is required.");
+    if (error) {
+      errorResponse(res, 400, error.details.map((e) => e.message).join(","));
     }
-
+    const { refreshToken } = req.body;
     const { accessToken } = await refreshAccessToken(refreshToken);
 
     successResponse(res, 200, "Token refreshed successfully", { accessToken });
